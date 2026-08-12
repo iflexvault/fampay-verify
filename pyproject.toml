@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fampay-verify"
-version = "1.0.4"
+version = "1.0.1"
 description = "FamPay payment verification utility and QR generator for Python"
 readme = "README.md"
 license = "MIT"
