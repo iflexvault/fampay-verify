@@ -9,7 +9,12 @@ import base64
 
 import qrcode
 from imap_tools import MailBox, AND
-from supabase import create_client, Client
+
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None
+    Client = None
 
 from .models import (
     FamPayVerifierConfig,
@@ -18,6 +23,32 @@ from .models import (
     QrResult,
     VerificationResult,
 )
+
+
+def _generate_qr_base64(upi_uri: str) -> str:
+    """Generate QR code as base64 PNG, with fallback to SVG if Pillow not available."""
+    qr = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=2,
+    )
+    qr.add_data(upi_uri)
+    qr.make(fit=True)
+
+    try:
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffer = BytesIO()
+        img.save(buffer, format="PNG")
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
+        return f"data:image/png;base64,{qr_base64}"
+    except ImportError:
+        import qrcode.image.svg
+        svg_img = qr.make_image(image_factory=qrcode.image.svg.SvgImage)
+        svg_buffer = BytesIO()
+        svg_img.save(svg_buffer)
+        svg_base64 = base64.b64encode(svg_buffer.getvalue()).decode("utf-8")
+        return f"data:image/svg+xml;base64,{svg_base64}"
 
 
 class FamPayVerifier:
@@ -54,21 +85,7 @@ class FamPayVerifier:
 
         try:
             upi_uri = f"upi://pay?pa={upi_id}&pn={name}&am={amount}&cu=INR"
-
-            qr = qrcode.QRCode(
-                version=None,
-                error_correction=qrcode.constants.ERROR_CORRECT_M,
-                box_size=10,
-                border=2,
-            )
-            qr.add_data(upi_uri)
-            qr.make(fit=True)
-
-            img = qr.make_image(fill_color="black", back_color="white")
-            buffer = BytesIO()
-            img.save(buffer, format="PNG")
-            qr_base64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
-            qr_data_url = f"data:image/png;base64,{qr_base64}"
+            qr_data_url = _generate_qr_base64(upi_uri)
 
             now_ist = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S")
 

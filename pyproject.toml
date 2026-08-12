@@ -4,15 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fampay-verify"
-version = "1.0.3"
+version = "1.0.4"
 description = "FamPay payment verification utility and QR generator for Python"
 readme = "README.md"
 license = "MIT"
 requires-python = ">=3.9"
 dependencies = [
-    "qrcode[pil]>=7.4",
+    "qrcode>=7.4",
     "imap-tools>=0.55",
-    "supabase>=2.0",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -42,6 +41,12 @@ dev = [
 test = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
+]
+supabase = [
+    "supabase>=2.0",
+]
+pil = [
+    "pillow>=9.1.0",
 ]
 
 [tool.setuptools.packages.find]
