@@ -1,0 +1,17 @@
+# Dependency directories
+node_modules/
+
+# Environment variables (NEVER commit these!)
+.env
+.env.local
+.env.*.local
+
+# Compiled output
+dist/
+
+# Vercel cache
+.vercel
+
+# System files
+.DS_Store
+Thumbs.db
